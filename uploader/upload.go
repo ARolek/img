@@ -35,11 +35,12 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	//	hash for filename
 	hash := RandomHash()
+
 	//	new file path
-	fPath := filepath.Join(*config.FS_TEMP, hash)
+	tmpPath := filepath.Join(*config.FS_TEMP, hash)
 
 	//	temp file location
-	tmpFile, err := os.Create(fPath)
+	tmpFile, err := os.Create(tmpPath)
 	if err != nil {
 		Error(w, "Unable to create the file for writing. Check your write access privilege", http.StatusInternalServerError)
 		return
@@ -55,20 +56,28 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	tmpFile.Close()
 
 	//	move file to S3 bucket
-	if err = MoveToS3(fPath, hash); err != nil {
+	if err = MoveToS3(tmpPath, hash); err != nil {
 		Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	//	clean up temp file
+	if err = os.Remove(tmpPath); err != nil {
+		Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	//	prepare response
 	fileData := File{
 		Hash: hash,
 		URL:  *config.CDN + "/" + hash,
 	}
 
-	//	nice, we made it.
+	//	send response to client
 	Success(w, fileData)
 }
 
+//	generates a random file hash
 func RandomHash() string {
 	//	generate a random string
 	rand := tools.GetRand()

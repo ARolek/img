@@ -10,7 +10,7 @@ import (
 
 func main() {
 	http.HandleFunc("/upload", uploader.UploadHandler)
-	http.HandleFunc("/img", uploader.Crop)
+	http.HandleFunc("/img/", uploader.Img)
 
 	log.Println("listening on port ", *config.HTTP_PORT)
 

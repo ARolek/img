@@ -1,0 +1,22 @@
+[http]
+port 		= "8080"
+staticRoot 	= "http/static"
+
+# filesystem
+[fs]
+temp = "/tmp"
+
+[aws]
+accessKeyId 	= ""
+secretAccessKey = ""
+
+[aws.s3]
+bucket 	= "img-api"
+
+[cdn]
+url = "/img"
+#url = "//img.ogol.io"
+
+[fastly]
+serviceId = "1Bf19OKfDfNPUVz1kbyPWb"
+apiKey = "baf32a7ebce3577a801183e774dddae5"

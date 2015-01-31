@@ -1,10 +1,11 @@
 [http]
 port 		= "8080"
-staticRoot 	= "http/static"
+staticRoot 	= "./static"
 
 # filesystem
 [fs]
 temp = "/tmp"
+staticRoot = "./static"
 
 [aws]
 accessKeyId 	= ""
@@ -14,9 +15,4 @@ secretAccessKey = ""
 bucket 	= "img-api"
 
 [cdn]
-url = "/img"
-#url = "//img.ogol.io"
-
-[fastly]
-serviceId = ""
-apiKey = ""
+url = "http://img.tinyfactory.io/img"

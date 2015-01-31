@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tiny Factory img server</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="container">
+        <div class="page-header">
+            <h1>img API</h1>
+        </div>
+        <h2>/upload</h2>
+        <p>
+            upload a file to the API from a web form.
+        </p>
+        <p>
+            example: <code>curl -i -F file=@photo.jpg http://img.tinyfactory.io/upload</code>
+        </p>
+        <p>
+            You will receive a JSON response that looks like this:
+        </p>
+        <p>
+            <div class="highlight">           
+<pre><code>{
+    "success":true,
+    "data":{
+        "hash":"671e3346e405b99441bf4f0de7abc4dd",
+        "url":"http://img.tinyfactory.io/img/671e3346e405b99441bf4f0de7abc4dd"
+    }
+}</code></pre>
+            </div>
+        </p>
+        <p> 
+            the <code>url</code> param will be used for image rendering requests
+        </p>
+        <h2>/img/:hash</h2>
+        <p>
+            the <code>/img/</code> endpoint handles rendering previously uploaded files using varous GET params. For example:
+        </p>
+        <div class="highlight">           
+<pre><code>http://img.tinyfactory.io/img/671e3346e405b99441bf4f0de7abc4dd?action=thumbnail&w=500&h=500</code></pre>
+        </div>
+        <h3>actions</h3>
+        <p>
+            actions direction the API to modify an previously uploaded image.
+        </p>
+        <div class="panel panel-default">
+            <div class="panel-heading"><strong>thumbnail</strong></div>
+            <div class="panel-body">
+                <p>
+                    resize an image to a smaller size while maintaining aspect ratio. if the dimensions provided are
+                    larger than the original image, the original image is served.
+                </p>
+                <p>
+                    params
+                    <ul>
+                        <li>w: width in pixels</li>
+                        <li>h: height in pixels</li>
+                        <li>
+                            algo: resize algo to apply. supported algos:
+                            <ul>
+                                <li>nearestNeighbor (default)</li>
+                                <li>bilinear</li>
+                                <li>mitchellNetravali</li>
+                                <li>lanczos2</li>                                                                
+                                <li>lanczos3</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </p>
+                <p>
+                    example:
+                    <code>http://img.tinyfactory.io/img/671e3346e405b99441bf4f0de7abc4dd?action=thumbnail&amp;w=500&amp;=500</code>
+                </p>
+            </div>
+        </div>      
+        <div class="panel panel-default">
+            <div class="panel-heading"><strong>crop</strong></div>
+            <div class="panel-body">
+                <p>
+                    crop an image. currently only crops from the center
+                </p>
+                <p>
+                    params
+                    <ul>
+                        <li>w: width in pixels</li>
+                        <li>h: height in pixels</li>
+                    </ul>
+                </p>
+                <p>
+                    example:
+                    <code>http://img.tinyfactory.io/img/671e3346e405b99441bf4f0de7abc4dd?action=thumbnail&amp;w=500&amp;=500</code>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+  </body>
+</html>

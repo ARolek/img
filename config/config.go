@@ -16,22 +16,19 @@ var (
 
 	//	http
 	HTTP_PORT        = config.String("http.port", ":8080")
-	HTTP_STATIC_ROOT = config.String("http.staticRoot", "http/static")
+	HTTP_STATIC_ROOT = config.String("http.staticRoot", "./static")
 
 	//	filesystem
-	FS_TEMP = config.String("fs.temp", "/tmp")
+	FS_TEMP        = config.String("fs.temp", "/tmp")
+	FS_STATIC_ROOT = config.String("fs.staticRoot", "./static")
 
 	//	aws
 	AWS_ACCESS_KEY_ID     = config.String("aws.accessKeyId", "")
 	AWS_SECRET_ACCESS_KEY = config.String("aws.secretAccessKey", "")
-	S3_BUCKET             = config.String("aws.s3.bucket", "ogol")
+	S3_BUCKET             = config.String("aws.s3.bucket", "img-api")
 
 	// cdn base
 	CDN = config.String("cdn.url", "")
-
-	//	fastly
-	FASTLY_SERVICEID = config.String("fastly.serviceId", "")
-	FASTLY_APIKEY    = config.String("fastly.apiKey", "")
 )
 
 func init() {

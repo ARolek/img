@@ -18,8 +18,6 @@ func MoveToS3(filePath, fileKey string) (err error) {
 	creds := aws.Creds(*config.AWS_ACCESS_KEY_ID, *config.AWS_SECRET_ACCESS_KEY, "")
 	cli := s3.New(creds, "us-east-1", nil)
 
-	log.Println(filePath)
-
 	file, err := os.Open(filePath)
 	if err != nil {
 		return
@@ -43,19 +41,23 @@ func MoveToS3(filePath, fileKey string) (err error) {
 		return
 	}
 
-	log.Println(resp)
+	//	TODO: manage errors
+	log.Println("s3 put response: ", resp)
 
 	return
 }
 
-func FetchFromS3(key, bucket string) (err error) {
+//	download from s3 based on bucket and file key.
+//	return an error or the tmpFile location
+func FetchFromS3(key, bucket string) (tmpFilePath string, err error) {
+	//	build our s3 url
 	url := fmt.Sprintf("https://%v.s3.amazonaws.com/%v", bucket, key)
 
-	tmpDest := filepath.Join(*config.FS_TEMP, RandomHash())
+	//	our temp file path
+	tmpFilePath = filepath.Join(*config.FS_TEMP, RandomHash())
 
-	log.Println(tmpDest)
-
-	if err = tools.HTTPdownload(url, tmpDest); err != nil {
+	//	downlod from s3 to our temp file location
+	if err = tools.HTTPdownload(url, tmpFilePath); err != nil {
 		return
 	}
 

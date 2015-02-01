@@ -12,9 +12,6 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/nfnt/resize"
-	"github.com/oliamb/cutter"
-
 	"img/config"
 )
 
@@ -78,6 +75,7 @@ func Img(w http.ResponseWriter, r *http.Request) {
 
 	//	extract our key
 	key := r.URL.Path[len("/img/"):]
+
 	//	confirm we have key
 	if key == "" {
 		Error(w, "no key provided", http.StatusBadRequest)
@@ -91,6 +89,12 @@ func Img(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	img, imgFormat, imgConf, err := Decode(tmpFilePath)
+	if err != nil {
+		Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	//	parse the request params
 	query := QueryDetails{}
 	if err = query.Parse(r.URL); err != nil {
@@ -98,24 +102,40 @@ func Img(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//	location of the temp file we will deliver to the client
-	var modFilePath string
-
+	//	our modified image
+	var cImg image.Image
 	switch query.Action {
 	case "crop":
-		modFilePath, err = Crop(query, tmpFilePath)
+		cImg, err = Crop(query, &img)
 		if err != nil {
 			Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-	case "thumbnail":
-		modFilePath, err = Thumbnail(query, tmpFilePath)
+		break
+	case "resize-preserve":
+		cImg, err = ResizePreserve(query, &img)
 		if err != nil {
 			Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		break
+	case "resize-clip":
+		//	resizeClip
+		cImg, err = ResizeClip(query, &img, imgConf)
+		if err != nil {
+			Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		break
 	default:
 		Error(w, "action not supported: "+query.Action, http.StatusInternalServerError)
+		return
+	}
+
+	//	encode our image
+	modImgPath, err := EncodeImage(&cImg, imgFormat)
+	if err != nil {
+		Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -123,7 +143,7 @@ func Img(w http.ResponseWriter, r *http.Request) {
 	//	fastly.com CDN key used for purging
 	w.Header().Set("Surrogate-Key", key)
 
-	//	will cache the asset with fastly forever, but with the
+	//	cache the asset with fastly forever, but with the
 	//	browser for only 1 hour. this way we don't have to
 	//	re-render the asset every hour.
 	//
@@ -132,116 +152,70 @@ func Img(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Surrogate-Control", "max-age=2592000")
 
 	//	send our file in the response
-	http.ServeFile(w, r, modFilePath)
+	http.ServeFile(w, r, modImgPath)
 
 	//	clean up the created file
-	err = os.Remove(modFilePath)
+	err = os.Remove(modImgPath)
 	if err != nil {
 		//	who do we tell?
 		log.Println(err)
 	}
 }
 
-func Crop(query QueryDetails, tmpFilePath string) (filePath string, err error) {
+//	opens an image file, decodes it, extracts meta data
+//	returns
+//		pointer to image,
+//		image format (jpeg, png, etc),
+//		image config data (i.e. width, height, colorModel)
+func Decode(tmpFilePath string) (img image.Image, imgFormat string, imgConf image.Config, err error) {
 	tmpImgFile, err := os.Open(tmpFilePath)
 	defer tmpImgFile.Close()
 	if err != nil {
 		return
 	}
 
-	img, imgFormat, err := image.Decode(tmpImgFile)
+	//	fetch image meta data, i.e. width & height
+	imgConf, _, err = image.DecodeConfig(tmpImgFile)
 	if err != nil {
 		return
 	}
 
-	cImg, err := cutter.Crop(img, cutter.Config{
-		Height: int(query.Height),
-		Width:  int(query.Width),
-		Mode:   cutter.Centered,
-	})
+	//	move back to the beginning of the file so we can decode it next
+	_, err = tmpImgFile.Seek(0, 0)
 	if err != nil {
 		return
 	}
 
-	//	cropped temp file location
-	filePath = filepath.Join(*config.FS_TEMP, RandomHash())
-
-	toImg, err := os.Create(filePath)
+	//	decode our image
+	img, imgFormat, err = image.Decode(tmpImgFile)
 	if err != nil {
-		return
-	}
-
-	//	encode our image
-	if err = EncodeImage(toImg, cImg, imgFormat); err != nil {
 		return
 	}
 
 	return
 }
 
-//	creats a thumbnail of an image maintaing aspect ratio
-//	if the width and height are larger than the original image, the original image is preserved
-func Thumbnail(query QueryDetails, tmpFilePath string) (filePath string, err error) {
-	tmpImgFile, err := os.Open(tmpFilePath)
-	defer tmpImgFile.Close()
+//	creates a temporary image files and encodes it
+//	based on the passed format
+func EncodeImage(img *image.Image, format string) (imgPath string, err error) {
+	//	temp file location
+	imgPath = filepath.Join(*config.FS_TEMP, RandomHash())
+
+	//	create a new file
+	file, err := os.Create(imgPath)
 	if err != nil {
 		return
 	}
 
-	img, imgFormat, err := image.Decode(tmpImgFile)
-	if err != nil {
-		return
-	}
+	defer file.Close()
 
-	var algo resize.InterpolationFunction
-	switch query.Algo {
-	case "nearestNeighbor":
-		algo = resize.NearestNeighbor
-		break
-	case "bilinear":
-		algo = resize.Bilinear
-		break
-	case "mitchellNetravali":
-		algo = resize.MitchellNetravali
-		break
-	case "lanczos2":
-		algo = resize.Lanczos2
-		break
-	case "lanczos3":
-		algo = resize.Lanczos3
-		break
-	default:
-		algo = resize.NearestNeighbor
-	}
-
-	//	resize the image
-	cImg := resize.Thumbnail(uint(query.Width), uint(query.Height), img, algo)
-
-	//	cropped temp file location
-	filePath = filepath.Join(*config.FS_TEMP, RandomHash())
-
-	toImg, err := os.Create(filePath)
-	if err != nil {
-		return
-	}
-
-	//	encode our image
-	if err = EncodeImage(toImg, cImg, imgFormat); err != nil {
-		return
-	}
-
-	return
-}
-
-//	encodes an image reference to a file reference based on the passed format
-func EncodeImage(file *os.File, img image.Image, format string) (err error) {
 	switch format {
 	case "jpeg":
-		if err = jpeg.Encode(file, img, &jpeg.Options{jpeg.DefaultQuality}); err != nil {
+		if err = jpeg.Encode(file, *img, &jpeg.Options{jpeg.DefaultQuality}); err != nil {
 			return
 		}
 	case "png":
-		if err = png.Encode(file, img); err != nil {
+		if err = png.Encode(file, *img); err != nil {
 			return
 		}
 	default:

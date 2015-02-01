@@ -54,54 +54,125 @@
         </div>
         <h3>actions</h3>
         <p>
-            actions direction the API to modify an previously uploaded image.
+            actions direct the API to modify a previously uploaded image.
         </p>
-        <div class="panel panel-default">
-            <div class="panel-heading"><strong>thumbnail</strong></div>
-            <div class="panel-body">
-                <p>
-                    resize an image to a smaller size while maintaining aspect ratio. if the dimensions provided are
-                    larger than the original image, the original image is served.
-                </p>
-                <p>
-                    params
-                    <ul>
-                        <li>w: width in pixels</li>
-                        <li>h: height in pixels</li>
-                        <li>
-                            algo: resize algo to apply. supported algos:
-                            <ul>
-                                <li>nearestNeighbor (default)</li>
-                                <li>bilinear</li>
-                                <li>mitchellNetravali</li>
-                                <li>lanczos2</li>                                                                
-                                <li>lanczos3</li>
-                            </ul>
-                        </li>
-                    </ul>
-                </p>
-                <p>
-                    example:
-                    <code>http://img.tinyfactory.io/img/671e3346e405b99441bf4f0de7abc4dd?action=thumbnail&amp;w=500&amp;=500</code>
-                </p>
-            </div>
-        </div>      
         <div class="panel panel-default">
             <div class="panel-heading"><strong>crop</strong></div>
             <div class="panel-body">
                 <p>
                     crop an image. currently only crops from the center
                 </p>
+                <table class="table">
+                    <caption>request params</caption>
+                    <thead>
+                        <tr>
+                            <th>param</th>
+                            <th>description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>w</td>
+                            <td>width in pixels</td>
+                        </tr>
+                        <tr>
+                            <td>h</td>
+                            <td>height in pixels</td>
+                        </tr>
+                    </tbody>
+                </table>
                 <p>
-                    params
-                    <ul>
-                        <li>w: width in pixels</li>
-                        <li>h: height in pixels</li>
-                    </ul>
+                    example:<br/>
+                    <code><a target="_blank" href="http://img.tinyfactory.io/img/671e3346e405b99441bf4f0de7abc4dd?action=crop&w=500&=500">http://img.tinyfactory.io/img/671e3346e405b99441bf4f0de7abc4dd?action=crop&amp;w=500&amp;=500</a></code>
                 </p>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading"><strong>resize-clip</strong></div>
+            <div class="panel-body">
                 <p>
-                    example:
-                    <code>http://img.tinyfactory.io/img/671e3346e405b99441bf4f0de7abc4dd?action=thumbnail&amp;w=500&amp;=500</code>
+                    resize an image to a smaller size while maintaining aspect ratio, and then clipping off excess space around the edge based on supplied params.
+                </p>
+                <table class="table">
+                    <caption>request params</caption>
+                    <thead>
+                        <tr>
+                            <th>param</th>
+                            <th>description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>w</td>
+                            <td>width in pixels</td>
+                        </tr>
+                        <tr>
+                            <td>h</td>
+                            <td>height in pixels</td>
+                        </tr>
+                        <tr>
+                            <td>algo</td>
+                            <td>
+                                resize algo to apply. supported algos:
+                                <ul>
+                                    <li>nearestNeighbor (default)</li>
+                                    <li>bilinear</li>
+                                    <li>mitchellNetravali</li>
+                                    <li>lanczos2</li>                                                                
+                                    <li>lanczos3</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>
+                    example:<br/>
+                    <code><a target="_blank" href="http://img.tinyfactory.io/img/671e3346e405b99441bf4f0de7abc4dd?action=resize-clip&w=500&=500">http://img.tinyfactory.io/img/671e3346e405b99441bf4f0de7abc4dd?action=resize-clip&amp;w=500&amp;=500</a></code>
+                </p>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading"><strong>resize-preserve</strong></div>
+            <div class="panel-body">
+                <p>
+                    resize an image to a smaller size while maintaining aspect ratio. if the dimensions provided are
+                    larger than the original image, the original image is served.
+                </p>
+                <table class="table">
+                    <caption>request params</caption>
+                    <thead>
+                        <tr>
+                            <th>param</th>
+                            <th>description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>w</td>
+                            <td>width in pixels</td>
+                        </tr>
+                        <tr>
+                            <td>h</td>
+                            <td>height in pixels</td>
+                        </tr>
+                        <tr>
+                            <td>algo</td>
+                            <td>
+                                resize algo to apply. supported algos:
+                                <ul>
+                                    <li>nearestNeighbor (default)</li>
+                                    <li>bilinear</li>
+                                    <li>mitchellNetravali</li>
+                                    <li>lanczos2</li>                                                                
+                                    <li>lanczos3</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>
+                    example:<br/>
+                    <code><a target="_blank" href="http://img.tinyfactory.io/img/671e3346e405b99441bf4f0de7abc4dd?action=resize-preserve&w=500&=500">http://img.tinyfactory.io/img/671e3346e405b99441bf4f0de7abc4dd?action=resize-preserve&amp;w=500&amp;=500</a></code>
                 </p>
             </div>
         </div>

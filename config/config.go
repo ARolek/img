@@ -23,9 +23,7 @@ var (
 	FS_STATIC_ROOT = config.String("fs.staticRoot", "./static")
 
 	//	aws
-	AWS_ACCESS_KEY_ID     = config.String("aws.accessKeyId", "")
-	AWS_SECRET_ACCESS_KEY = config.String("aws.secretAccessKey", "")
-	S3_BUCKET             = config.String("aws.s3.bucket", "img-api")
+	S3_BUCKET = config.String("aws.s3.bucket", "img-api")
 
 	// cdn base
 	CDN = config.String("cdn.url", "")

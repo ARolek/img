@@ -5,14 +5,13 @@ import (
 	"image"
 	"image/jpeg"
 	"image/png"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
 
-	"img/config"
+	"github.com/arolek/img/config"
 )
 
 type QueryDetails struct {
@@ -140,28 +139,21 @@ func Img(w http.ResponseWriter, r *http.Request) {
 		Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	//	clean up the created file
+	defer os.Remove(modImgPath)
 
 	//	set cache control headers
 	//	fastly.com CDN key used for purging
 	w.Header().Set("Surrogate-Key", key)
 
-	//	cache the asset with fastly forever, but with the
-	//	browser for only 1 hour. this way we don't have to
-	//	re-render the asset every hour.
+	//	cache the asset with fastly for 30 days
 	//
 	//	reference: https://docs.fastly.com/guides/tutorials/cache-control-tutorial
-	w.Header().Set("Cache-Control", "max-age=3600")
+	w.Header().Set("Cache-Control", "max-age=2592000")
 	w.Header().Set("Surrogate-Control", "max-age=2592000")
 
 	//	send our file in the response
 	http.ServeFile(w, r, modImgPath)
-
-	//	clean up the created file
-	err = os.Remove(modImgPath)
-	if err != nil {
-		//	who do we tell?
-		log.Println(err)
-	}
 }
 
 //	opens an image file, decodes it, extracts meta data

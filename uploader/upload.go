@@ -10,7 +10,7 @@ import (
 
 	"github.com/arolek/tools"
 
-	"img/config"
+	"github.com/arolek/img/config"
 )
 
 type File struct {
@@ -33,8 +33,6 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	//	new file path
 	tmpPath := filepath.Join(*config.FS_TEMP, hash)
-
-	log.Println("tmpPath", tmpPath)
 
 	//	temp file location
 	tmpFile, err := os.Create(tmpPath)

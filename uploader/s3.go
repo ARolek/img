@@ -7,16 +7,25 @@ import (
 	"path/filepath"
 
 	"github.com/arolek/tools"
-	"github.com/awslabs/aws-sdk-go/aws"
-	"github.com/awslabs/aws-sdk-go/gen/s3"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 
-	"img/config"
+	"github.com/arolek/img/config"
 )
+
+const region = "us-east-1"
 
 //	move the file to s3
 func MoveToS3(filePath, fileKey string) (err error) {
-	creds := aws.Creds(*config.AWS_ACCESS_KEY_ID, *config.AWS_SECRET_ACCESS_KEY, "")
-	cli := s3.New(creds, "us-east-1", nil)
+	//	creds := aws.Creds(*config.AWS_ACCESS_KEY_ID, *config.AWS_SECRET_ACCESS_KEY, "")
+
+	svc := s3.New(
+		session.New(),
+		&aws.Config{Region: aws.String(region)},
+	)
+
+	//	cli := s3.New(creds, "us-east-1", nil)
 
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -28,21 +37,21 @@ func MoveToS3(filePath, fileKey string) (err error) {
 		return
 	}
 
-	putReq := s3.PutObjectRequest{
+	putReq := s3.PutObjectInput{
 		ACL:           aws.String(s3.BucketCannedACLPublicRead),
 		Body:          file,
 		Bucket:        aws.String(*config.S3_BUCKET),
 		Key:           aws.String(fileKey),
-		ContentLength: aws.Long(stat.Size()),
+		ContentLength: aws.Int64(stat.Size()),
 	}
 
-	resp, err := cli.PutObject(&putReq)
+	resp, err := svc.PutObject(&putReq)
 	if err != nil {
 		return
 	}
 
 	//	TODO: manage errors
-	log.Println("s3 put response: ", resp)
+	//	log.Println("s3 put response: ", resp)
 
 	return
 }

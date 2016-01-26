@@ -8,8 +8,6 @@ temp = "/tmp"
 staticRoot = "./static"
 
 [aws]
-accessKeyId 	= ""
-secretAccessKey = ""
 
 [aws.s3]
 bucket 	= "img-api"

@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"img/config"
-	"img/uploader"
+	"github.com/arolek/img/config"
+	"github.com/arolek/img/uploader"
 )
 
 func main() {

@@ -88,6 +88,8 @@ func Img(w http.ResponseWriter, r *http.Request) {
 		Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	//	clean up our tmp file
+	defer os.Remove(tmpFilePath)
 
 	img, imgFormat, imgConf, err := Decode(tmpFilePath)
 	if err != nil {

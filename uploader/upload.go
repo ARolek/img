@@ -26,7 +26,6 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	defer postData.Close()
 
 	//	hash for filename
@@ -34,6 +33,8 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	//	new file path
 	tmpPath := filepath.Join(*config.FS_TEMP, hash)
+
+	log.Println("tmpPath", tmpPath)
 
 	//	temp file location
 	tmpFile, err := os.Create(tmpPath)

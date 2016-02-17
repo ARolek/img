@@ -2,7 +2,6 @@ package uploader
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -18,14 +17,10 @@ const region = "us-east-1"
 
 //	move the file to s3
 func MoveToS3(filePath, fileKey string) (err error) {
-	//	creds := aws.Creds(*config.AWS_ACCESS_KEY_ID, *config.AWS_SECRET_ACCESS_KEY, "")
-
 	svc := s3.New(
 		session.New(),
 		&aws.Config{Region: aws.String(region)},
 	)
-
-	//	cli := s3.New(creds, "us-east-1", nil)
 
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -45,7 +40,7 @@ func MoveToS3(filePath, fileKey string) (err error) {
 		ContentLength: aws.Int64(stat.Size()),
 	}
 
-	resp, err := svc.PutObject(&putReq)
+	_, err = svc.PutObject(&putReq)
 	if err != nil {
 		return
 	}

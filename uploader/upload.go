@@ -20,6 +20,21 @@ type File struct {
 
 //	handles uploading of a file and generating a random file hash for it
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
+	//	to make the cross domain upload cross browser comptatibale
+	//	per https://github.com/blueimp/jQuery-File-Upload/wiki/Cross-domain-uploads
+	if r.Method == "OPTIONS" {
+		//	TODO: make this configuable so the domain can be locked down
+		//	allow cross origin uploads
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		Success(w, nil)
+		return
+	}
+
+	if r.Method != "POST" {
+		Error(w, "expecting a POST request", http.StatusBadRequest)
+		return
+	}
+
 	// the FormFile function takes in the POST input id file
 	postData, _, err := r.FormFile("file")
 	if err != nil {
@@ -67,6 +82,10 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		Hash: hash,
 		URL:  *config.CDN + "/" + hash,
 	}
+
+	//	TODO: make this configuable so the domain can be locked down
+	//	allow cross origin uploads
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	//	send response to client
 	Success(w, fileData)

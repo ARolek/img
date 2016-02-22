@@ -19,6 +19,10 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+*config.HTTP_PORT, nil))
 }
 
+func handleIndex(w http.ResponseWriter, r *http.Request) {
+
+}
+
 //	static file server
 func handleStatic(w http.ResponseWriter, r *http.Request) {
 	var uri string

@@ -20,12 +20,13 @@ type File struct {
 
 //	handles uploading of a file and generating a random file hash for it
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
+	//	TODO: make this configuable so the domain can be locked down
+	//	allow cross origin uploads
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	//	to make the cross domain upload cross browser comptatibale
 	//	per https://github.com/blueimp/jQuery-File-Upload/wiki/Cross-domain-uploads
 	if r.Method == "OPTIONS" {
-		//	TODO: make this configuable so the domain can be locked down
-		//	allow cross origin uploads
-		w.Header().Set("Access-Control-Allow-Origin", "*")
 		Success(w, nil)
 		return
 	}
@@ -55,6 +56,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		Error(w, "Unable to create the file for writing. Check your write access privilege", http.StatusInternalServerError)
 		return
 	}
+	defer tmpFile.Close()
 
 	// write the content from POST to the file
 	_, err = io.Copy(tmpFile, postData)
@@ -62,8 +64,6 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	tmpFile.Close()
 
 	//	move file to S3 bucket
 	if err = MoveToS3(tmpPath, hash); err != nil {
@@ -82,10 +82,6 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		Hash: hash,
 		URL:  *config.CDN + "/" + hash,
 	}
-
-	//	TODO: make this configuable so the domain can be locked down
-	//	allow cross origin uploads
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	//	send response to client
 	Success(w, fileData)
